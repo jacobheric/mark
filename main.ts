@@ -1,7 +1,8 @@
 import { App, fsRoutes, staticFiles } from "fresh";
-import { define, redirect, type State } from "./utils.ts";
+import { define, redirect } from "@/lib/utils.ts";
 import { createGitHubOAuthConfig, createHelpers } from "jsr:@deno/kv-oauth";
 import "@std/dotenv/load";
+import { type State } from "./lib/state.ts";
 
 const unrestricted = [
   "/auth",

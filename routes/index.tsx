@@ -1,6 +1,13 @@
+import { define } from "@/lib/utils.ts";
 import { useSignal } from "@preact/signals";
-import { define } from "../utils.ts";
+import { page } from "fresh";
 import Counter from "../islands/Counter.tsx";
+
+export const handler = define.handlers({
+  GET() {
+    return page();
+  },
+});
 
 export default define.page(function Home() {
   const count = useSignal(3);

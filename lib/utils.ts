@@ -1,7 +1,7 @@
 import { createDefine } from "fresh";
+import { State } from "./state.ts";
 
-// deno-lint-ignore no-empty-interface
-export interface State {}
+import { setCookie as internalSetCookie } from "@std/http/cookie";
 
 export const define = createDefine<State>();
 
@@ -16,3 +16,15 @@ export const logFormData = (data: FormData) => {
     console.log(pair[0] + ", " + pair[1]);
   }
 };
+
+export const setCookie = (
+  headers: Headers,
+  name: string,
+  value: string,
+) =>
+  internalSetCookie(headers, {
+    name,
+    path: "/",
+    value,
+    maxAge: 400 * 24 * 60 * 60,
+  });
