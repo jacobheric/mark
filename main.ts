@@ -1,3 +1,4 @@
+/// <reference lib="deno.unstable" />
 import { App, fsRoutes, staticFiles } from "fresh";
 import { define, redirect } from "@/lib/utils.ts";
 import { createGitHubOAuthConfig, createHelpers } from "jsr:@deno/kv-oauth";

@@ -8,6 +8,7 @@ import Marks from "../components/marks.tsx";
 export const handler = define.handlers({
   async GET() {
     const marks = await allMarks();
+
     return page({
       marks: (marks as { value: MarkType }[]).map(({ value }) => value),
     });

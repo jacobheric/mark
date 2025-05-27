@@ -1,19 +1,11 @@
-import { allSaves, importSaves, SaveType } from "@/lib/pocket.ts";
+import { importSaves } from "@/lib/pocket.ts";
 import { define } from "@/lib/state.ts";
 import { getCookies } from "@std/http/cookie";
-import { page, PageProps } from "fresh";
-import { MarkType } from "../../lib/marks.ts";
-import Marks from "../../components/marks.tsx";
+import { page } from "fresh";
 
-type SavesType = {
-  saves: MarkType[];
-};
-
-export const handler = define.handlers<SavesType>({
-  async GET(ctx) {
-    const pocketToken = getCookies(ctx.req.headers).pocketToken;
-
-    return page({ saves: await allSaves(pocketToken) });
+export const handler = define.handlers({
+  GET() {
+    return page();
   },
   async POST(ctx) {
     const pocketToken = getCookies(ctx.req.headers).pocketToken;
@@ -22,7 +14,7 @@ export const handler = define.handlers<SavesType>({
   },
 });
 
-export default function PocketImport({ data }: PageProps<SavesType>) {
+export default function PocketImport() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4">
@@ -32,7 +24,6 @@ export default function PocketImport({ data }: PageProps<SavesType>) {
           </button>
         </form>
       </div>
-      <Marks marks={data.saves} />;
     </div>
   );
 }

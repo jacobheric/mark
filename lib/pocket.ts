@@ -28,14 +28,6 @@ export type ListType = {
   };
 };
 
-export type ResultType = {
-  list: {
-    [key: string]: Save;
-  };
-  status: number;
-  total: number;
-};
-
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const savesPage = async (pocketToken: string, offset: number) => {
@@ -48,10 +40,11 @@ export const savesPage = async (pocketToken: string, offset: number) => {
     body: JSON.stringify({
       consumer_key: POCKET_CONSUMER_KEY,
       access_token: pocketToken,
-      count: 10,
+      count: 30,
       offset: offset,
       total: 1,
       sort: "newest",
+      state: "unread",
     }),
   });
 
@@ -62,12 +55,12 @@ export const savesPage = async (pocketToken: string, offset: number) => {
   return await response.json();
 };
 
-export const allSaves = async (pocketToken: string): Promise<MarkType[]> => {
+export const importSaves = async (pocketToken: string) => {
   let offset = 0;
-  const saves: MarkType[] = [];
 
   while (true) {
     try {
+      console.log("fetching page", offset);
       const response = await savesPage(pocketToken, offset);
       const { list }: ListType = response;
 
@@ -76,44 +69,31 @@ export const allSaves = async (pocketToken: string): Promise<MarkType[]> => {
         break;
       }
 
-      saves.push(
-        ...Object.values(list).map((item) => ({
-          url: item.resolved_url,
-          title: item.resolved_title,
-          dateAdded: item.time_added,
-          image: item.top_image_url,
-          excerpt: item.excerpt,
-          tags: item.tags ? Object.keys(item.tags) : [],
-        })),
-      );
+      console.log("inserting batch to kv");
+      for (const save of Object.values(list)) {
+        if (!save.resolved_url) {
+          console.log("no resolved url, skipping", save);
+          continue;
+        }
+
+        await kv.set(["marks", save.resolved_url], {
+          url: save.resolved_url,
+          excerpt: save.excerpt,
+          title: save.resolved_title,
+          image: save.top_image_url,
+          dateAdded: save.time_added,
+          tags: save.tags ? Object.keys(save.tags) : [],
+        });
+      }
 
       offset += 30;
-
-      await sleep(1000);
+      //
+      // sidestep pocket api rate limiting.
+      console.log("batch inserted, sleeping");
+      await sleep(250);
     } catch (error) {
       console.log("fetch error, breaking", error);
       break;
     }
-  }
-  return saves.sort((a, b) => b.dateAdded - a.dateAdded);
-};
-
-export const importSaves = async (pocketToken: string) => {
-  const saves = await allSaves(pocketToken);
-
-  for (const save of saves) {
-    kv.set(["marks", save.url], {
-      url: save.url,
-      excerpt: save.excerpt,
-      title: save.title,
-      image: save.image,
-      dateAdded: save.dateAdded,
-      tags: save.tags,
-    });
-  }
-
-  const entries = kv.list({ prefix: ["marks"] });
-  for await (const entry of entries) {
-    console.log("entry", entry);
   }
 };
