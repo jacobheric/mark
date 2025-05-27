@@ -1,12 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-.fresh-gradient {
-  background-color: rgb(134, 239, 172);
-  background-image: linear-gradient(
-    to right bottom,
-    rgb(219, 234, 254),
-    rgb(187, 247, 208),
-    rgb(254, 249, 195)
-  );
+
+@layer base {
+  a {
+    @apply hover:no-underline underline underline-offset-4 decoration-1;
+  }
+}
+
+input {
+  @apply border border-gray-200 dark:bg-gray-900 p-3 rounded w-full;
+}
+
+textarea {
+  @apply border border-gray-200 dark:bg-gray-900 p-3 rounded w-full;
+}
+
+select {
+  @apply border border-gray-200 dark:bg-gray-900 bg-white p-3 rounded w-full
+    appearance-none pr-10 text-gray-900 dark:text-white;
+  background-image: url("/chevron.svg");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1em;
+}
+
+button {
+  @apply border border-gray-200 bg-gray-100 dark:bg-gray-700 p-3 rounded
+    disabled:cursor-not-allowed;
+}
+
+button[type="submit"] {
+  @apply border border-gray-200 bg-gray-100 dark:bg-gray-700 p-3 rounded
+    disabled:cursor-not-allowed;
 }

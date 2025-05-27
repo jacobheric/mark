@@ -1,58 +1,38 @@
-import { POCKET_CONSUMER_KEY } from "@/lib/config.ts";
-import { define, type State } from "@/lib/state.ts";
-import { setCookie } from "@/lib/utils.ts";
-import { FreshContext, page, PageProps } from "fresh";
+import { allSaves, importSaves, SaveType } from "@/lib/pocket.ts";
+import { define } from "@/lib/state.ts";
 import { getCookies } from "@std/http/cookie";
+import { page, PageProps } from "fresh";
+import { MarkType } from "../../lib/marks.ts";
+import Marks from "../../components/marks.tsx";
 
-type Save = {
-  item_id: string;
-  given_url: string;
-  tags: {
-    item_id: string;
-    tag: string;
-  };
+type SavesType = {
+  saves: MarkType[];
 };
 
-type ResultType = {
-  list: {
-    [key: string]: Save;
-  };
-};
-
-export const handler = define.handlers<ResultType>({
+export const handler = define.handlers<SavesType>({
   async GET(ctx) {
     const pocketToken = getCookies(ctx.req.headers).pocketToken;
-    const response = await fetch("https://getpocket.com/v3/get", {
-      headers: {
-        "Content-Type": "application/json",
-        "X-Accept": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify({
-        consumer_key: POCKET_CONSUMER_KEY,
-        access_token: pocketToken,
-        count: 30,
-      }),
-    });
 
-    if (!response.ok) {
-      throw new Error("Failed to get pocket saves");
-    }
-    const { list } = await response.json();
-
-    return page({ list });
+    return page({ saves: await allSaves(pocketToken) });
+  },
+  async POST(ctx) {
+    const pocketToken = getCookies(ctx.req.headers).pocketToken;
+    await importSaves(pocketToken);
+    return new Response("OK");
   },
 });
 
-export default function PocketImport({ data }: PageProps<ResultType>) {
+export default function PocketImport({ data }: PageProps<SavesType>) {
   return (
-    <div className="m-8">
-      {Object.values(data.list).map((item: Save) => (
-        <div key={item.item_id} className="border-b border-gray-200">
-          <p>{item.given_url}</p>
-          <p>{JSON.stringify(item.tags)}</p>
-        </div>
-      ))}
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
+        <form method="post">
+          <button type="submit" className="m-6">
+            Import
+          </button>
+        </form>
+      </div>
+      <Marks marks={data.saves} />;
     </div>
   );
 }

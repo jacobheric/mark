@@ -16,7 +16,6 @@ export const app = new App<State>();
 
 app.use(staticFiles());
 
-// this is the same as the /api/:name route defined via a file. feel free to delete this!
 app.get("/auth/signin", async (ctx) => {
   return await signIn(ctx.req);
 });
@@ -50,6 +49,7 @@ const authMiddleware = define.middleware(async (ctx) => {
   }
   return ctx.next();
 });
+
 app.use(authMiddleware);
 
 await fsRoutes(app, {
