@@ -2,7 +2,7 @@ import { MarkType } from "../lib/marks.ts";
 
 export default function Marks({ marks }: { marks: MarkType[] }) {
   return (
-    <div className="p-8 ">
+    <div className="p-8">
       {marks.map(
         (item: MarkType) => (
           <div
@@ -15,13 +15,13 @@ export default function Marks({ marks }: { marks: MarkType[] }) {
                   {item.title}
                 </a>
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-300">
                 {new Date(item.dateAdded * 1000).toLocaleDateString()}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-300">
                 {item.excerpt}
               </div>
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-300">
                 <img
                   className="max-h-24"
                   src={item.image}
@@ -29,7 +29,7 @@ export default function Marks({ marks }: { marks: MarkType[] }) {
                 />
               </div>
             </div>
-            <div className="flex flex-col items-start wrap text-sm text-gray-500">
+            <div className="flex flex-col items-start wrap text-sm text-gray-500 dark:text-gray-300">
               {item.tags
                 ?.map((tag) => <div key={tag}>{tag}</div>)}
             </div>

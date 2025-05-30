@@ -11,3 +11,14 @@ export type MarkType = {
 
 export const allMarks = async () =>
   await Array.fromAsync(kv.list({ prefix: ["marks"] }));
+
+export const upsertMark = async (mark: { url: string; tags: string[] }) =>
+  await kv.set(["marks", mark.url], {
+    ...mark,
+    dateAdded:
+      (await kv.get<MarkType>(["marks", mark.url]))?.value?.dateAdded ??
+        Date.now(),
+  });
+
+export const getMark = async (url: string) =>
+  await kv.get<MarkType>(["marks", url]);

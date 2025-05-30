@@ -81,7 +81,7 @@ export const importSaves = async (pocketToken: string) => {
           excerpt: save.excerpt,
           title: save.resolved_title,
           image: save.top_image_url,
-          dateAdded: save.time_added,
+          dateAdded: new Date(save.time_added * 1000),
           tags: save.tags ? Object.keys(save.tags) : [],
         });
       }

@@ -9,7 +9,7 @@ export default function App({ Component }: PageProps) {
         <title>mark</title>
         <link rel="stylesheet" href="/styles.css" />
       </head>
-      <body>
+      <body class="text-black dark:text-white bg-white dark:bg-gray-900">
         <Component />
       </body>
     </html>
