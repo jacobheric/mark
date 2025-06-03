@@ -17,6 +17,11 @@ type MarkProps = {
 export const handler = define.handlers<MarkProps>({
   async GET(ctx) {
     const url = ctx.url.searchParams.get("url") ?? "";
+
+    if (!url) {
+      return new Response("url is required", { status: 400 });
+    }
+
     const mark = await getMark(url);
 
     return page({

@@ -2,21 +2,34 @@ import { define } from "@/lib/utils.ts";
 
 import { page, PageProps } from "fresh";
 
-import { allMarks, MarkType } from "../lib/marks.ts";
 import Marks from "../components/marks.tsx";
+import { MarkType, pagedMarks } from "../lib/marks.ts";
+import { kvValues } from "../lib/kv.ts";
 
-export const handler = define.handlers({
-  async GET() {
-    const marks = await allMarks();
+type MarksProps = {
+  marks: MarkType[];
+  cursor: string;
+};
+
+export const handler = define.handlers<MarksProps>({
+  async GET(ctx) {
+    const url = new URL(ctx.req.url);
+    const iter = pagedMarks({
+      cursor: url.searchParams.get("cursor") ?? "",
+      limit: 20,
+    });
+
+    const marks = await kvValues(iter);
 
     return page({
-      marks: (marks as { value: MarkType }[]).map(({ value }) => value),
+      marks,
+      cursor: iter.cursor,
     });
   },
 });
 
 export default define.page(
-  function Home({ data }: PageProps<{ marks: MarkType[] }>) {
-    return <Marks marks={data.marks} />;
+  function Home({ data }: PageProps<MarksProps>) {
+    return <Marks marks={data.marks} cursor={data.cursor} />;
   },
 );

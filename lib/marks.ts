@@ -12,6 +12,10 @@ export type MarkType = {
 export const allMarks = async () =>
   await Array.fromAsync(kv.list({ prefix: ["marks"] }));
 
+export const pagedMarks = (options?: Deno.KvListOptions) => {
+  return kv.list<MarkType>({ prefix: ["marks"] }, options);
+};
+
 export const upsertMark = async (mark: { url: string; tags: string[] }) =>
   await kv.set(["marks", mark.url], {
     ...mark,

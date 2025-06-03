@@ -1,6 +1,6 @@
 import { POCKET_CONSUMER_KEY } from "./config.ts";
 import { kv } from "./kv.ts";
-import { MarkType } from "./marks.ts";
+import { parse } from "jsr:@std/csv";
 
 export type Tag = {
   [key: string]: {
@@ -79,9 +79,9 @@ export const importSaves = async (pocketToken: string) => {
         await kv.set(["marks", save.resolved_url], {
           url: save.resolved_url,
           excerpt: save.excerpt,
-          title: save.resolved_title,
           image: save.top_image_url,
-          dateAdded: new Date(save.time_added * 1000),
+          title: save.resolved_title,
+          dateAdded: new Date(save.time_added * 1000).toISOString(),
           tags: save.tags ? Object.keys(save.tags) : [],
         });
       }
@@ -96,4 +96,20 @@ export const importSaves = async (pocketToken: string) => {
       break;
     }
   }
+};
+
+export const importCsv = async (file: File) => {
+  const contents = await file.text();
+  const data = parse(contents, { skipFirstRow: true });
+
+  for (const row of data) {
+    await kv.set(["marks", row.url], {
+      title: row.title,
+      url: row.url,
+      dateAdded: new Date(Number(row.time_added) * 1000).toISOString(),
+      tags: (row.tags as string)?.split("|"),
+    });
+  }
+
+  return data;
 };
