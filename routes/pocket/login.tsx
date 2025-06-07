@@ -2,7 +2,6 @@ import { POCKET_CONSUMER_KEY } from "@/lib/config.ts";
 import { define, type State } from "@/lib/state.ts";
 import { setCookie } from "@/lib/utils.ts";
 import { FreshContext } from "fresh";
-import { getCookies } from "@std/http/cookie";
 
 const POCKET_AUTH_URL = "https://getpocket.com/auth/authorize";
 

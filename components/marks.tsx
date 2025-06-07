@@ -28,7 +28,8 @@ export default function Marks(
               <div className="text-xs text-gray-500 dark:text-gray-300">
                 {new Date(item.dateAdded).toLocaleString()}
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-300">
+              {
+                /* <div className="text-xs text-gray-500 dark:text-gray-300">
                 {item.excerpt}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-300">
@@ -37,11 +38,16 @@ export default function Marks(
                   src={item.image}
                   alt={item.title}
                 />
-              </div>
+              </div> */
+              }
             </div>
-            <div className="flex flex-col items-start wrap text-sm text-gray-500 dark:text-gray-300">
+            <div className="flex flex-col items-start wrap text-sm text-gray-500 dark:text-gray-300 gap-1">
               {item.tags
-                ?.map((tag) => <div key={tag}>{tag}</div>)}
+                ?.map((tag) => (
+                  <div key={tag}>
+                    <a href={`/?tag=${tag}`}>{tag}</a>
+                  </div>
+                ))}
             </div>
             <hr />
           </div>
