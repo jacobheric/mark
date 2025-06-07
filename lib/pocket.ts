@@ -1,5 +1,5 @@
 import { POCKET_CONSUMER_KEY } from "./config.ts";
-import { kv } from "./kv.ts";
+import { kv } from "./kv/kv.ts";
 import { parse } from "jsr:@std/csv";
 
 export type Tag = {
@@ -103,12 +103,29 @@ export const importCsv = async (file: File) => {
   const data = parse(contents, { skipFirstRow: true });
 
   for (const row of data) {
-    await kv.set(["marks", row.url], {
+    const key = ["marks", row.url];
+    const tags = (row.tags as string)?.split("|").filter((t) => t) || [];
+    const mark = {
       title: row.title,
       url: row.url,
       dateAdded: new Date(Number(row.time_added) * 1000).toISOString(),
-      tags: (row.tags as string)?.split("|"),
-    });
+      tags,
+    };
+
+    await kv.atomic()
+      .check({ key, versionstamp: null })
+      .set(key, mark)
+      .commit();
+
+    //
+    // secondary index by tag
+    await Promise.all(
+      tags.filter((tag) => tag).map((tag) =>
+        kv.atomic()
+          .set(["tags", tag, row.url], mark)
+          .commit()
+      ),
+    );
   }
 
   return data;

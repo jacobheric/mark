@@ -1382,6 +1382,10 @@
       "bin": true
     }
   },
+  "remote": {
+    "https://deno.land/x/tabler_icons_tsx@0.0.5/tsx/check.tsx": "7a34654bec04502f8c411801621572232fa842a3a916fe6da0897aa0affb60ac",
+    "https://deno.land/x/tabler_icons_tsx@0.0.5/tsx/edit.tsx": "b716057d94886788478cb7ad19f5465ab74c8be31eb00b37892bca6f0b362354"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@fresh/core@^2.0.0-alpha.34",

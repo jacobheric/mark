@@ -1,4 +1,4 @@
-import { kv } from "./kv.ts";
+import { kv } from "./kv/kv.ts";
 
 export type MarkType = {
   url: string;
@@ -15,6 +15,17 @@ export const allMarks = async () =>
 export const pagedMarks = (options?: Deno.KvListOptions) => {
   return kv.list<MarkType>({ prefix: ["marks"] }, options);
 };
+
+export const pagedMarksByTag = (tag: string, options?: Deno.KvListOptions) => {
+  return kv.list<MarkType>({ prefix: ["tags", tag] }, options);
+};
+
+export const pagedTags = (options?: Deno.KvListOptions) => {
+  return kv.list({ prefix: ["tags"] }, options);
+};
+
+export const allTags = async () =>
+  await Array.fromAsync(kv.list({ prefix: ["tags"] }));
 
 export const upsertMark = async (mark: { url: string; tags: string[] }) =>
   await kv.set(["marks", mark.url], {

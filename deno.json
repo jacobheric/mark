@@ -4,7 +4,8 @@
     "start": "deno run -A --watch=static/,routes/ --unstable-kv dev.ts",
     "build": "deno run -A --unstable-kv dev.ts build",
     "preview": "deno run -A --unstable-kv main.ts",
-    "update": "deno run -A -r jsr:@fresh/update ."
+    "update": "deno run -A -r jsr:@fresh/update .",
+    "drop": "deno run -A --unstable-kv lib/kv/delete.ts"
   },
   "lint": {
     "rules": {
@@ -25,7 +26,8 @@
     "@std/http": "jsr:@std/http",
     "preact": "npm:preact@^10.26.6",
     "@preact/signals": "npm:@preact/signals@^2.0.4",
-    "tailwindcss": "npm:tailwindcss@^3.4.3"
+    "tailwindcss": "npm:tailwindcss@^3.4.3",
+    "tabler-icons/": "https://deno.land/x/tabler_icons_tsx@0.0.5/"
   },
   "compilerOptions": {
     "lib": [
