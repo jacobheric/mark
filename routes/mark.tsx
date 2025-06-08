@@ -2,13 +2,11 @@ import { define } from "@/lib/utils.ts";
 
 import { page, PageProps } from "fresh";
 
-import { allMarks, getMark, MarkType, upsertMark } from "../lib/marks.ts";
-import Marks from "../components/marks.tsx";
 import { Mark } from "../islands/mark.tsx";
-import { fromFileUrl } from "jsr:@std/path@0.221/from-file-url";
+import { getMark, upsertMark } from "../lib/marks.ts";
 
 type MarkProps = {
-  url: string;
+  url?: string;
   tags?: string[];
   success?: boolean;
   error?: string;
@@ -17,12 +15,7 @@ type MarkProps = {
 export const handler = define.handlers<MarkProps>({
   async GET(ctx) {
     const url = ctx.url.searchParams.get("url") ?? "";
-
-    if (!url) {
-      return new Response("url is required", { status: 400 });
-    }
-
-    const mark = await getMark(url);
+    const mark = url ? await getMark(url) : null;
 
     return page({
       url,
@@ -35,7 +28,9 @@ export const handler = define.handlers<MarkProps>({
     const url = form.get("url")?.toString();
 
     if (!url) {
-      return new Response("url is required", { status: 400 });
+      return page({
+        error: "url is required",
+      });
     }
 
     const tags = form.getAll("tags[]").map((tag) => tag.toString());
@@ -46,10 +41,11 @@ export const handler = define.handlers<MarkProps>({
         tags,
       });
     } catch (e) {
+      console.error("error saving mark", e);
       return page({
         url,
         tags,
-        error: "Error saving tags",
+        error: "Error saving mark",
       });
     }
 

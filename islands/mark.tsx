@@ -56,13 +56,17 @@ export const Mark = ({ url, tags = [""], success, error }: MarkProps) => {
 
   return (
     <div class="flex flex-col gap-4 m-8 text-sm">
-      <div>
-        <a href={url} target="_blank">
-          {url}
-        </a>
-      </div>
+      <form class="flex flex-col gap-2" method="post">
+        <div>
+          <input
+            type="text"
+            name="url"
+            value={url}
+            placeholder="url"
+            required
+          />
+        </div>
 
-      <form class="flex flex-col gap-2 max-w-96" method="post">
         <input type="hidden" name="url" value={url} />
         <div class="flex flex-col gap-1" id="tags">
           {tagList.map((tag, i) => (
