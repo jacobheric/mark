@@ -5,6 +5,12 @@ import { createGitHubOAuthConfig, createHelpers } from "jsr:@deno/kv-oauth";
 import "@std/dotenv/load";
 import { type State } from "./lib/state.ts";
 
+//
+// shenanigans because @deno/kv-oauth requires GITHUB_ but github forbids these
+// as env vars for CI actions
+Deno.env.set("GITHUB_CLIENT_ID", Deno.env.get("GH_CLIENT_ID") || "");
+Deno.env.set("GITHUB_CLIENT_SECRET", Deno.env.get("GH_CLIENT_SECRET") || "");
+
 const unrestricted = [
   "/auth",
 ];

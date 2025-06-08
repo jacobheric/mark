@@ -11,8 +11,8 @@ add a `.env`:
 PRODUCTION=true
 
 # or whatever oauth provider you set up
-GITHUB_CLIENT_ID=[your-id]
-GITHUB_CLIENT_SECRET=[your-secret]
+GH_CLIENT_ID=[your-id]
+GH_CLIENT_SECRET=[your-secret]
 
 # if importing from the pocket api
 POCKET_CONSUMER_KEY=[your-key]
