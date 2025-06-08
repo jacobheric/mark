@@ -32,3 +32,11 @@ javascript:(() => {
   window.open(`http://localhost:8000/mark?url=${currentUrl}`, "_blank");
 })();
 ```
+
+![](./screenshots/marks.png)
+
+![](./screenshots/mark.png)
+
+![](./screenshots/tags.png)
+
+![](./screenshots/import.png)
