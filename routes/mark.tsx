@@ -1,4 +1,4 @@
-import { define } from "@/lib/utils.ts";
+import { define, getTitle } from "@/lib/utils.ts";
 
 import { page, PageProps } from "fresh";
 
@@ -34,11 +34,13 @@ export const handler = define.handlers<MarkProps>({
     }
 
     const tags = form.getAll("tags[]").map((tag) => tag.toString());
+    const title = await getTitle(url);
 
     try {
       await upsertMark({
         url,
         tags,
+        title,
       });
     } catch (e) {
       console.error("error saving mark", e);

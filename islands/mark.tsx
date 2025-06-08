@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 
 export type MarkProps = {
-  url: string;
+  url?: string;
   tags?: string[];
   success?: boolean;
   error?: string;

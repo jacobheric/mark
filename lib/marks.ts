@@ -27,7 +27,11 @@ export const pagedTags = (options?: Deno.KvListOptions) => {
 export const allTags = async () =>
   await Array.fromAsync(kv.list({ prefix: ["tags"] }));
 
-export const upsertMark = async (mark: { url: string; tags: string[] }) =>
+export const upsertMark = async (mark: {
+  url: string;
+  tags: string[];
+  title?: string | null;
+}) =>
   await kv.set(["marks", mark.url], {
     ...mark,
     dateAdded:

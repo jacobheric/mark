@@ -28,3 +28,16 @@ export const setCookie = (
     value,
     maxAge: 400 * 24 * 60 * 60,
   });
+
+export const getTitle = async (url: string): Promise<string | null> => {
+  try {
+    const response = await fetch(url);
+    const html = await response.text();
+
+    const match = html.match(/<title[^>]*>(.*?)<\/title>/i);
+    return match ? match[1].trim() : null;
+  } catch (err) {
+    console.error(`Failed to fetch title from ${url}:`, err);
+    return null;
+  }
+};
