@@ -41,3 +41,6 @@ export const upsertMark = async (mark: {
 
 export const getMark = async (url: string) =>
   await kv.get<MarkType>(["marks", url]);
+
+export const deleteMark = async (url: string) =>
+  await kv.delete(["marks", url]);

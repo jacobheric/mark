@@ -20,7 +20,7 @@ export default function Layout(ctx: PageProps) {
         <Nav pathname={pathname} />
       </div>
 
-      <div className="flex flex-col flex-1 justify-between my-6 sm:w-[90%] px-4 md:max-w-6xl md:mx-auto">
+      <div className="flex flex-col flex-1 justify-between my-6 sm:w-[90%] px-4 md:max-w-6xl md:mx-auto overflow-x-hidden">
         <Partial name="overlay-content">
           <ctx.Component />
         </Partial>

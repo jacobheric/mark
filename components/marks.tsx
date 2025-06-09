@@ -29,7 +29,10 @@ export default function Marks(
                   <a href={item.url} target="_blank">
                     {item.title}
                   </a>
-                  <a href={`/mark?url=${item.url}`} className="cursor-pointer">
+                  <a
+                    href={`/mark?url=${encodeURIComponent(item.url)}`}
+                    className="cursor-pointer"
+                  >
                     <IconEdit size={16} />
                   </a>
                 </div>

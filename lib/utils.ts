@@ -31,13 +31,26 @@ export const setCookie = (
 
 export const getTitle = async (url: string): Promise<string | null> => {
   try {
-    const response = await fetch(url);
-    const html = await response.text();
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
 
+    const response = await fetch(url, {
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    clearTimeout(timeoutId);
+
+    const html = await response.text();
     const match = html.match(/<title[^>]*>(.*?)<\/title>/i);
     return match ? match[1].trim() : null;
   } catch (err) {
-    console.error(`Failed to fetch title from ${url}:`, err);
+    if (err instanceof Error) {
+      console.error(`Failed to fetch title from ${url}:`, err.message);
+    }
     return null;
   }
 };

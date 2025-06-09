@@ -5,6 +5,7 @@ export type MarkProps = {
   tags?: string[];
   success?: boolean;
   error?: string;
+  deleted?: boolean;
 };
 
 const Tag = (
@@ -43,9 +44,13 @@ const Tag = (
   );
 };
 
-export const Mark = ({ url, tags = [""], success, error }: MarkProps) => {
+export const Mark = (
+  { url, tags = [""], success, error, deleted }: MarkProps,
+) => {
   const [tagList, setTagList] = useState<string[]>(tags);
+  const [deleteMark, setDeleteMark] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const another = () => setTagList((prev) => [...prev, ""]);
 
@@ -54,9 +59,19 @@ export const Mark = ({ url, tags = [""], success, error }: MarkProps) => {
       inputRefs.current[inputRefs.current.length - 1]?.focus();
   }, [tagList.length]);
 
+  useEffect(() => {
+    if (deleteMark) {
+      formRef.current?.submit();
+    }
+  }, [deleteMark]);
+
   return (
     <div class="flex flex-col gap-4 m-8 text-sm">
-      <form class="flex flex-col gap-2" method="post">
+      <form
+        ref={formRef}
+        class="flex flex-col gap-2"
+        method="post"
+      >
         <div>
           <input
             type="text"
@@ -68,6 +83,11 @@ export const Mark = ({ url, tags = [""], success, error }: MarkProps) => {
         </div>
 
         <input type="hidden" name="url" value={url} />
+        <input
+          type="hidden"
+          name="deleteMark"
+          value={deleteMark ? "true" : "false"}
+        />
         <div class="flex flex-col gap-1" id="tags">
           {tagList.map((tag, i) => (
             <Tag
@@ -86,9 +106,26 @@ export const Mark = ({ url, tags = [""], success, error }: MarkProps) => {
           add another
         </button>
         <hr />
-        <button type="submit" className=" w-fit">save</button>
+        <div className="flex flex-row gap-2">
+          <button type="submit" className="w-fit">save</button>
+          <button
+            type="button"
+            className="hover:border-red-500 hover:bg-red-100 hover:text-red-500"
+            onClick={() => setDeleteMark(true)}
+          >
+            delete
+          </button>
+        </div>
         <div className="text-md">
           {success && <div>Saved!</div>}
+          {deleted && (
+            <div className="flex flex-row gap-2">
+              <div>Deleted!</div>
+              <a href="/">
+                home &#8594;
+              </a>
+            </div>
+          )}
           {error && <div className="text-red-500">{error}</div>}
         </div>
       </form>

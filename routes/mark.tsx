@@ -1,15 +1,16 @@
-import { define, getTitle } from "@/lib/utils.ts";
+import { define, getTitle, redirect } from "@/lib/utils.ts";
 
 import { page, PageProps } from "fresh";
 
 import { Mark } from "../islands/mark.tsx";
-import { getMark, upsertMark } from "../lib/marks.ts";
+import { deleteMark, getMark, upsertMark } from "../lib/marks.ts";
 
 type MarkProps = {
   url?: string;
   tags?: string[];
   success?: boolean;
   error?: string;
+  deleted?: boolean;
 };
 
 export const handler = define.handlers<MarkProps>({
@@ -26,10 +27,18 @@ export const handler = define.handlers<MarkProps>({
   async POST(ctx) {
     const form = await ctx.req.formData();
     const url = form.get("url")?.toString();
+    const d = form.get("deleteMark")?.toString();
 
     if (!url) {
       return page({
         error: "url is required",
+      });
+    }
+
+    if (d === "true") {
+      await deleteMark(url);
+      return page({
+        deleted: true,
       });
     }
 
@@ -40,7 +49,7 @@ export const handler = define.handlers<MarkProps>({
       await upsertMark({
         url,
         tags,
-        title,
+        ...(title ? { title } : {}),
       });
     } catch (e) {
       console.error("error saving mark", e);
@@ -67,6 +76,7 @@ export default define.page(
         tags={data.tags}
         success={data.success}
         error={data.error}
+        deleted={data.deleted}
       />
     );
   },
