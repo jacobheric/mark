@@ -13,7 +13,7 @@ export default function Layout(ctx: PageProps) {
             class="no-underline flex flex-row justify-start items-center gap-1"
             href="/"
           >
-            home
+            mark
           </a>
         </div>
 
