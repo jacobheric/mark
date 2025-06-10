@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "check": "deno fmt --check . && deno lint . && deno check **/*.ts && deno check **/*.tsx",
+    "ok": "deno fmt --check . && deno lint . && deno check --unstable-kv **/*.ts && deno check --unstable-kv **/*.tsx",
     "start": "deno run -A --watch=static/,routes/ --unstable-kv dev.ts",
     "build": "deno run -A --unstable-kv dev.ts build",
     "preview": "deno run -A --unstable-kv main.ts",

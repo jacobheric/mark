@@ -9,6 +9,7 @@
     "jsr:@std/assert@0.221": "0.221.0",
     "jsr:@std/async@0.221": "0.221.0",
     "jsr:@std/bytes@^1.0.2": "1.0.5",
+    "jsr:@std/bytes@^1.0.5": "1.0.5",
     "jsr:@std/cli@0.221": "0.221.0",
     "jsr:@std/cli@^1.0.17": "1.0.17",
     "jsr:@std/crypto@1": "1.0.4",
@@ -99,7 +100,7 @@
     "@luca/esbuild-deno-loader@0.11.1": {
       "integrity": "dc020d16d75b591f679f6b9288b10f38bdb4f24345edb2f5732affa1d9885267",
       "dependencies": [
-        "jsr:@std/bytes",
+        "jsr:@std/bytes@^1.0.2",
         "jsr:@std/encoding@^1.0.5",
         "jsr:@std/path@^1.0.6"
       ]
@@ -224,7 +225,10 @@
       ]
     },
     "@std/streams@1.0.9": {
-      "integrity": "a9d26b1988cdd7aa7b1f4b51e1c36c1557f3f252880fa6cc5b9f37078b1a5035"
+      "integrity": "a9d26b1988cdd7aa7b1f4b51e1c36c1557f3f252880fa6cc5b9f37078b1a5035",
+      "dependencies": [
+        "jsr:@std/bytes@^1.0.5"
+      ]
     }
   },
   "npm": {

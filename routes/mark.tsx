@@ -1,4 +1,4 @@
-import { define, getTitle, redirect } from "@/lib/utils.ts";
+import { define, getTitle } from "@/lib/utils.ts";
 
 import { page, PageProps } from "fresh";
 

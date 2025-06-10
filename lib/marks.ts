@@ -12,14 +12,28 @@ export type MarkType = {
 export const allMarks = async () =>
   await Array.fromAsync(kv.list({ prefix: ["marks"] }));
 
+const getScore = (query: string, mark: MarkType): number => {
+  const scores = [
+    fuzzyIncludes(query, mark.url),
+    fuzzyIncludes(query, mark.title),
+    ...mark.tags.map((tag) => fuzzyIncludes(query, tag)),
+  ];
+  return Math.max(...scores);
+};
+
 export const searchMarks = async (query: string) => {
   const marks = await Array.fromAsync(kv.list<MarkType>({ prefix: ["marks"] }));
-  return marks.filter((mark) =>
-    fuzzyIncludes(query, mark.value.url) ||
-    fuzzyIncludes(query, mark.value.title) ||
-    mark.value.tags.some((tag) => fuzzyIncludes(query, tag))
-  );
+
+  return marks
+    .map((mark) => ({
+      mark,
+      score: getScore(query, mark.value),
+    }))
+    .filter((result) => result.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map((result) => result.mark);
 };
+
 export const pagedMarks = (options?: Deno.KvListOptions) => {
   return kv.list<MarkType>({ prefix: ["marks"] }, options);
 };
@@ -78,18 +92,25 @@ const fuzzyIncludes = (
   query: string,
   text?: string,
   maxDistance = 1,
-): boolean => {
+): number => {
   if (!text) {
-    return false;
+    return 0;
   }
   const lowerText = text.toLowerCase();
   const lowerQuery = query.toLowerCase();
 
-  if (lowerText.includes(lowerQuery)) {
-    return true;
+  const words = lowerText.split(/[^a-z0-9]+/i);
+
+  if (words.includes(lowerQuery)) {
+    return 3;
   }
 
-  const words = lowerText.split(/[^a-z0-9]+/i);
+  if (lowerText.includes(lowerQuery)) {
+    return 2;
+  }
+
+  let score = 0;
+
   for (const word of words) {
     if (Math.abs(word.length - lowerQuery.length) > maxDistance) {
       continue;
@@ -97,9 +118,9 @@ const fuzzyIncludes = (
 
     const distance = levenshtein(word, lowerQuery);
     if (distance <= maxDistance) {
-      return true;
+      score = distance;
     }
   }
 
-  return false;
+  return score;
 };
