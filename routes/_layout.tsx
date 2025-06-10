@@ -7,8 +7,8 @@ export default function Layout(ctx: PageProps) {
 
   return (
     <div className="flex flex-col justify-start min-h-screen">
-      <div class="border-b p-4 flex flex-row justify-between h-14 sticky top-0 bg-white dark:bg-gray-900">
-        <div class="font-bold tracking-widest">
+      <div class="border-b pl-4 gap-4 flex flex-row justify-between items-center h-14 sticky top-0 bg-white dark:bg-gray-900">
+        <div class="font-bold tracking-widest flex-shrink-0">
           <a
             class="no-underline flex flex-row justify-start items-center gap-1"
             href="/"
