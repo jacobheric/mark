@@ -72,7 +72,7 @@ export default define.page(
             name="search"
             type="text"
             placeholder="Search"
-            className="border border-gray-300 rounded-md w-full"
+            className="border border-gray-300 rounded-md w-full outline-none"
             value={data.search}
           />
         </form>
