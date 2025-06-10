@@ -39,7 +39,7 @@ export const handler = define.handlers<ImportProps>({
 
 export default function PocketImport({ data }: PageProps<ImportProps>) {
   return (
-    <div className="flex flex-col gap-4 m-8">
+    <div className="flex flex-col gap-4 m-8 mx-auto">
       <form method="post">
         <input type="hidden" name="type" value="api" />
         <button type="submit">
