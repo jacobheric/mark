@@ -1,16 +1,8 @@
 import { define } from "@/lib/utils.ts";
 
-import { FreshContext, page, PageProps } from "fresh";
+import { page, PageProps } from "fresh";
 
-import Marks from "../components/marks.tsx";
-import {
-  fixDates,
-  MarkType,
-  pagedMarks,
-  pagedMarksByTag,
-  searchMarks,
-} from "../lib/marks.ts";
-import { kvValues } from "../lib/kv/kv.ts";
+import { fixDates } from "../lib/marks.ts";
 
 type FixProps = {
   success?: boolean;

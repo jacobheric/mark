@@ -1,5 +1,4 @@
 import { allMarks } from "../marks.ts";
-import { kvValues } from "./kv.ts";
 
 const marks = await allMarks();
 
