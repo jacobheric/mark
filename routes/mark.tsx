@@ -4,6 +4,7 @@ import { page, PageProps } from "fresh";
 
 import { Mark } from "../islands/mark.tsx";
 import { deleteMark, getMark, upsertMark } from "../lib/marks.ts";
+import { kv } from "../lib/kv/kv.ts";
 
 type MarkProps = {
   url?: string;

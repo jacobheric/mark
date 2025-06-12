@@ -11,12 +11,15 @@ import { type State } from "./lib/state.ts";
 Deno.env.set("GITHUB_CLIENT_ID", Deno.env.get("GH_CLIENT_ID") || "");
 Deno.env.set("GITHUB_CLIENT_SECRET", Deno.env.get("GH_CLIENT_SECRET") || "");
 
+const AUTHORIZED_USERS = Deno.env.get("AUTHORIZED_USERS")?.split(",") || [];
+const PRODUCTION = Deno.env.get("PRODUCTION") === "true";
+
 const unrestricted = [
   "/auth",
 ];
 
 export const { signIn, handleCallback, signOut, getSessionId } = createHelpers(
-  createGitHubOAuthConfig(),
+  createGitHubOAuthConfig({ scope: "read:user user:email" }),
 );
 
 export const app = new App<State>();
@@ -28,7 +31,24 @@ app.get("/auth/signin", async (ctx) => {
 });
 
 app.get("/auth/callback", async (ctx) => {
-  const { response } = await handleCallback(ctx.req);
+  const { response, tokens } = await handleCallback(ctx.req);
+  if (!PRODUCTION) {
+    return response;
+  }
+
+  const userResponse = await fetch("https://api.github.com/user", {
+    method: "get",
+
+    headers: {
+      Authorization: `Bearer ${tokens.accessToken}`,
+    },
+  });
+
+  const user = await userResponse.json();
+  if (!AUTHORIZED_USERS.includes(user.login)) {
+    await signOut(ctx.req);
+    return new Response("Unauthorized", { status: 401 });
+  }
   return response;
 });
 
@@ -49,7 +69,9 @@ const authMiddleware = define.middleware(async (ctx) => {
     return ctx.next();
   }
 
-  if (await getSessionId(ctx.req) === undefined) {
+  const sessionId = await getSessionId(ctx.req);
+
+  if (sessionId === undefined) {
     return redirect(
       "/auth/signin",
     );

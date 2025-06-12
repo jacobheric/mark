@@ -40,7 +40,7 @@ export default function Marks(
                 <div className="text-xs text-gray-500 dark:text-gray-300 flex flex-col gap-1">
                   <div>{item.url}</div>
                   <div>{new Date(item.dateAdded).toLocaleString()}</div>
-                  <div>{item.excerpt}</div>
+                  {/* <div>{item.excerpt}</div> */}
                 </div>
               </div>
               <div className="flex flex-row flex-wrap items-start wrap text-sm text-gray-500 dark:text-gray-300 gap-2">

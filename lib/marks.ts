@@ -3,14 +3,12 @@ import { kv } from "./kv/kv.ts";
 export type MarkType = {
   url: string;
   title: string;
-  dateAdded: number;
-  image: string;
-  excerpt: string;
+  dateAdded: string;
   tags: string[];
 };
 
 export const allMarks = async () =>
-  await Array.fromAsync(kv.list({ prefix: ["marks"] }));
+  await Array.fromAsync(kv.list<MarkType>({ prefix: ["marks"] }));
 
 const getScore = (query: string, mark: MarkType): number => {
   const scores = [
@@ -22,7 +20,7 @@ const getScore = (query: string, mark: MarkType): number => {
 };
 
 export const searchMarks = async (query: string) => {
-  const marks = await Array.fromAsync(kv.list<MarkType>({ prefix: ["marks"] }));
+  const marks = await allMarks();
 
   return marks
     .map((mark) => ({
@@ -34,8 +32,16 @@ export const searchMarks = async (query: string) => {
     .map((result) => result.mark);
 };
 
+export const fixDates = async () => {
+  const marks = await allMarks();
+
+  for (const mark of marks) {
+    await kv.set(["dateAdded", "marks", mark.value.dateAdded], mark.value);
+  }
+};
+
 export const pagedMarks = (options?: Deno.KvListOptions) => {
-  return kv.list<MarkType>({ prefix: ["marks"] }, options);
+  return kv.list<MarkType>({ prefix: ["dateAdded"] }, options);
 };
 
 export const pagedMarksByTag = (tag: string, options?: Deno.KvListOptions) => {
@@ -49,17 +55,39 @@ export const pagedTags = (options?: Deno.KvListOptions) => {
 export const allTags = async () =>
   await Array.fromAsync(kv.list({ prefix: ["tags"] }));
 
-export const upsertMark = async (mark: {
+export const upsertMark = async (input: {
   url: string;
   tags: string[];
   title?: string | null;
-}) =>
-  await kv.set(["marks", mark.url], {
-    ...mark,
-    dateAdded:
-      (await kv.get<MarkType>(["marks", mark.url]))?.value?.dateAdded ??
-        Date.now(),
-  });
+}) => {
+  //
+  // convoluted exists check here so we don't overwrite dateAdded or alter
+  // the existing date added secondary index
+  const existing = (await kv.get<MarkType>(["marks", input.url]))?.value;
+  const dateAdded = new Date().toISOString();
+  const mark = {
+    ...input,
+    dateAdded: existing?.dateAdded ?? dateAdded,
+  };
+
+  await kv.atomic().set(["marks", mark.url], mark).commit();
+
+  //
+  // secondary index by tag
+  await Promise.all(
+    mark.tags.filter((tag) => tag).map((tag) =>
+      kv.atomic()
+        .set(["tags", tag, mark.url], mark)
+        .commit()
+    ),
+  );
+
+  //
+  // secondary index by date added
+  if (!existing) {
+    await kv.atomic().set(["dateAdded", "marks", dateAdded], mark).commit();
+  }
+};
 
 export const getMark = async (url: string) =>
   await kv.get<MarkType>(["marks", url]);

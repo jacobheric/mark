@@ -16,6 +16,9 @@ GH_CLIENT_SECRET=[your-secret]
 
 # if importing from the pocket api
 POCKET_CONSUMER_KEY=[your-key]
+
+# comma delimited
+AUTHORIZED_USERS=someusers
 ```
 
 then

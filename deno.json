@@ -5,7 +5,8 @@
     "build": "deno run -A --unstable-kv dev.ts build",
     "preview": "deno run -A --unstable-kv main.ts",
     "update": "deno run -A -r jsr:@fresh/update .",
-    "drop": "deno run -A --unstable-kv lib/kv/delete.ts"
+    "drop": "deno run -A --unstable-kv lib/kv/delete.ts",
+    "all": "deno run -A --unstable-kv lib/kv/all.ts"
   },
   "lint": {
     "rules": {

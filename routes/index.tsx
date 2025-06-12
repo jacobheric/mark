@@ -38,10 +38,12 @@ const getMarks = async (ctx: FreshContext) => {
     ? pagedMarksByTag(tag, {
       cursor,
       limit,
+      reverse: true,
     })
     : pagedMarks({
       cursor,
       limit,
+      reverse: true,
     });
 
   const marks = await kvValues(iter);
