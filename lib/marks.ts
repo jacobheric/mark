@@ -41,9 +41,15 @@ export const searchMarks = async (query: string) => {
 
 export const fixDates = async () => {
   const marks = await allMarks();
+  await kv.delete(["dateAdded"]);
 
   for (const mark of marks) {
-    await kv.set(["dateAdded", "marks", mark.value.dateAdded], mark.value);
+    const dateAdded = new Date(mark.value.dateAdded).toISOString();
+    await kv.atomic().set(["marks", mark.value.url], mark.value).set([
+      "dateAdded",
+      "marks",
+      dateAdded,
+    ], mark.value).commit();
   }
 };
 
