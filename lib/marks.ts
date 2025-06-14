@@ -67,6 +67,7 @@ export const upsertMark = async (input: {
   const dateAdded = new Date().toISOString();
   const mark = {
     ...input,
+    tags: input.tags.filter((tag) => tag),
     dateAdded: existing?.dateAdded ?? dateAdded,
   };
 
