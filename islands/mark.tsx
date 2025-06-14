@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 
 export type MarkProps = {
   url?: string;
+  title?: string;
   tags?: string[];
   success?: boolean;
   error?: string;
@@ -9,10 +10,11 @@ export type MarkProps = {
 };
 
 const Tag = (
-  { defaultValue, another, inputRef }: {
+  { defaultValue, another, inputRef, formRef }: {
     defaultValue?: string;
     another: () => void;
-    inputRef?: (el: HTMLInputElement | null) => void;
+    formRef: HTMLFormElement | null;
+    inputRef: (el: HTMLInputElement | null) => void;
   },
 ) => {
   return (
@@ -24,10 +26,18 @@ const Tag = (
         defaultValue={defaultValue}
         ref={inputRef}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            another();
+          if (e.key !== "Enter") {
+            return;
           }
+
+          e.preventDefault();
+
+          if (e.currentTarget.value) {
+            another();
+            return;
+          }
+
+          formRef?.submit();
         }}
       />
       <button
@@ -45,14 +55,24 @@ const Tag = (
 };
 
 export const Mark = (
-  { url, tags = [""], success, error, deleted }: MarkProps,
+  { url, title, tags = [""], success, error, deleted }: MarkProps,
 ) => {
   const [tagList, setTagList] = useState<string[]>(tags);
   const [deleteMark, setDeleteMark] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const saveRef = useRef<HTMLButtonElement>(null);
 
   const another = () => setTagList((prev) => [...prev, ""]);
+
+  useEffect(() => {
+    formRef.current?.addEventListener("submit", () => {
+      if (saveRef.current) {
+        saveRef.current.disabled = true;
+        saveRef.current.textContent = "saving...";
+      }
+    });
+  }, []);
 
   useEffect(() => {
     inputRefs.current.length &&
@@ -85,6 +105,11 @@ export const Mark = (
         <input type="hidden" name="url" value={url} />
         <input
           type="hidden"
+          name="title"
+          value={title}
+        />
+        <input
+          type="hidden"
           name="deleteMark"
           value={deleteMark ? "true" : "false"}
         />
@@ -94,6 +119,7 @@ export const Mark = (
               key={tag + i}
               defaultValue={tags[i] || ""}
               another={another}
+              formRef={formRef.current}
               inputRef={(el) => (inputRefs.current[i] = el)}
             />
           ))}
@@ -107,10 +133,16 @@ export const Mark = (
         </button>
         <hr />
         <div className="flex flex-row gap-2">
-          <button type="submit" className="w-fit">save</button>
+          <button
+            type="submit"
+            className="w-24 disabled:opacity-50"
+            ref={saveRef}
+          >
+            save
+          </button>
           <button
             type="button"
-            className="hover:border-red-500 hover:bg-red-100 hover:text-red-500"
+            className="hover:border-red-500 hover:bg-red-100 hover:text-red-500 w-24 disabled:opacity-50"
             onClick={() => setDeleteMark(true)}
           >
             delete

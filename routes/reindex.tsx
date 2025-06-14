@@ -2,7 +2,7 @@ import { define } from "@/lib/utils.ts";
 
 import { page, PageProps } from "fresh";
 
-import { allMarksByDateAdded, fixDates, MarkType } from "../lib/marks.ts";
+import { allMarks, MarkType, reindex } from "../lib/marks.ts";
 
 type FixProps = {
   success?: boolean;
@@ -12,27 +12,30 @@ type FixProps = {
 
 export const handler = define.handlers<FixProps>({
   async GET() {
-    const marks = await allMarksByDateAdded();
+    const marks = await allMarks();
     return page({
       marks,
       length: marks.length,
     });
   },
   async POST() {
-    await fixDates();
+    await reindex();
+    const marks = await allMarks();
     return page({
       success: true,
+      marks,
+      length: marks.length,
     });
   },
 });
 
 export default define.page(
-  function Fix({ data }: PageProps<FixProps>) {
+  function Reindex({ data }: PageProps<FixProps>) {
     return (
       <div class="flex flex-col gap-8">
         {data.success && <div class="m-6">Success!</div>}
         <form className="w-full" method="post">
-          <button type="submit">Fix Dates</button>
+          <button type="submit">reindex</button>
         </form>
         <div class="flex flex-col gap-2">
           <div>

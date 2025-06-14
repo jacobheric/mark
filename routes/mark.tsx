@@ -1,4 +1,4 @@
-import { define, getTitle } from "@/lib/utils.ts";
+import { define } from "@/lib/utils.ts";
 
 import { page, PageProps } from "fresh";
 
@@ -7,6 +7,7 @@ import { deleteMark, getMark, upsertMark } from "../lib/marks.ts";
 
 type MarkProps = {
   url?: string;
+  title?: string;
   tags?: string[];
   success?: boolean;
   error?: string;
@@ -16,10 +17,12 @@ type MarkProps = {
 export const handler = define.handlers<MarkProps>({
   async GET(ctx) {
     const url = ctx.url.searchParams.get("url") ?? "";
+    const title = ctx.url.searchParams.get("title") ?? "";
     const mark = url ? await getMark(url) : null;
 
     return page({
       url,
+      title: title || mark?.value?.title,
       tags: mark?.value?.tags,
       dateAdded: mark?.value?.dateAdded,
     });
@@ -43,7 +46,7 @@ export const handler = define.handlers<MarkProps>({
     }
 
     const tags = form.getAll("tags[]").map((tag) => tag.toString());
-    const title = await getTitle(url);
+    const title = form.get("title")?.toString();
 
     try {
       await upsertMark({
@@ -55,6 +58,7 @@ export const handler = define.handlers<MarkProps>({
       console.error("error saving mark", e);
       return page({
         url,
+        title,
         tags,
         error: "Error saving mark",
       });
@@ -62,6 +66,7 @@ export const handler = define.handlers<MarkProps>({
 
     return page({
       url,
+      title,
       tags,
       success: true,
     });
@@ -73,6 +78,7 @@ export default define.page(
     return (
       <Mark
         url={data.url}
+        title={data.title}
         tags={data.tags}
         success={data.success}
         error={data.error}

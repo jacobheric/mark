@@ -32,7 +32,8 @@ use with a bookmarklet like so:
 ```
 javascript:(() => {
   const currentUrl = encodeURIComponent(window.location.href);
-  window.open(`http://localhost:8000/mark?url=${currentUrl}`, "_blank");
+  const currentTitle = encodeURIComponent(document.title);
+  window.open(`http://[localhost:8000]/mark?url=${currentUrl}&title=${currentTitle}`, "_blank");
 })();
 ```
 

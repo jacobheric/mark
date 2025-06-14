@@ -39,11 +39,14 @@ export const searchMarks = async (query: string) => {
     .map((result) => result.mark);
 };
 
-export const fixDates = async () => {
+export const reindex = async () => {
   const marks = await allMarks();
 
-  const iter = kv.list({ prefix: ["dateAdded", "marks"] });
-  await Array.fromAsync(iter, ({ key }) => kv.delete(key));
+  const dateIter = kv.list({ prefix: ["dateAdded", "marks"] });
+  await Array.fromAsync(dateIter, ({ key }) => kv.delete(key));
+
+  const tagIter = kv.list({ prefix: ["tags"] });
+  await Array.fromAsync(tagIter, ({ key }) => kv.delete(key));
 
   for (const mark of marks) {
     const dateAdded = new Date(mark.value.dateAdded).toISOString();
@@ -52,6 +55,14 @@ export const fixDates = async () => {
       "marks",
       dateAdded,
     ], mark.value).commit();
+
+    await Promise.all(
+      mark.value.tags.filter((tag) => tag).map((tag) =>
+        kv.atomic()
+          .set(["tags", tag.trim(), mark.value.url], mark.value)
+          .commit()
+      ),
+    );
   }
 };
 
@@ -82,7 +93,7 @@ export const upsertMark = async (input: {
   const dateAdded = new Date().toISOString();
   const mark = {
     ...input,
-    tags: input.tags.filter((tag) => tag),
+    tags: input.tags.filter((tag) => tag).map((tag) => tag.trim()),
     dateAdded: existing?.dateAdded ?? dateAdded,
   };
 
@@ -93,7 +104,7 @@ export const upsertMark = async (input: {
   await Promise.all(
     mark.tags.filter((tag) => tag).map((tag) =>
       kv.atomic()
-        .set(["tags", tag, mark.url], mark)
+        .set(["tags", tag.trim(), mark.url], mark)
         .commit()
     ),
   );
