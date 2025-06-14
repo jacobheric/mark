@@ -2,7 +2,7 @@ import { define } from "@/lib/utils.ts";
 
 import { page, PageProps } from "fresh";
 
-import { allMarks, fixDates, MarkType } from "../lib/marks.ts";
+import { allMarksByDateAdded, fixDates, MarkType } from "../lib/marks.ts";
 
 type FixProps = {
   success?: boolean;
@@ -11,7 +11,7 @@ type FixProps = {
 
 export const handler = define.handlers<FixProps>({
   async GET() {
-    const marks = await allMarks();
+    const marks = await allMarksByDateAdded();
     return page({
       marks,
     });

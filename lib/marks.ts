@@ -10,6 +10,13 @@ export type MarkType = {
 export const allMarks = async () =>
   await Array.fromAsync(kv.list<MarkType>({ prefix: ["marks"] }));
 
+export const allMarksByDateAdded = async () =>
+  await Array.fromAsync(kv.list<MarkType>({
+    prefix: ["dateAdded", "marks"],
+  }, {
+    reverse: true,
+  }));
+
 const getScore = (query: string, mark: MarkType): number => {
   const scores = [
     fuzzyIncludes(query, mark.url),
@@ -41,7 +48,7 @@ export const fixDates = async () => {
 };
 
 export const pagedMarks = (options?: Deno.KvListOptions) => {
-  return kv.list<MarkType>({ prefix: ["dateAdded"] }, options);
+  return kv.list<MarkType>({ prefix: ["dateAdded", "marks"] }, options);
 };
 
 export const pagedMarksByTag = (tag: string, options?: Deno.KvListOptions) => {
