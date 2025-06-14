@@ -7,6 +7,7 @@ import { allMarksByDateAdded, fixDates, MarkType } from "../lib/marks.ts";
 type FixProps = {
   success?: boolean;
   marks?: Deno.KvEntry<MarkType>[];
+  length?: number;
 };
 
 export const handler = define.handlers<FixProps>({
@@ -14,6 +15,7 @@ export const handler = define.handlers<FixProps>({
     const marks = await allMarksByDateAdded();
     return page({
       marks,
+      length: marks.length,
     });
   },
   async POST() {
@@ -32,7 +34,12 @@ export default define.page(
         <form className="w-full" method="post">
           <button type="submit">Fix Dates</button>
         </form>
-        <pre>{JSON.stringify(data.marks, null, 2)}</pre>
+        <div class="flex flex-col gap-2">
+          <div>
+            {data.length} marks
+          </div>
+          <pre>{JSON.stringify(data.marks, null, 2)}</pre>
+        </div>
       </div>
     );
   },
