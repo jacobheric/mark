@@ -124,7 +124,7 @@ const insertMark = async (mark: MarkType) => {
     .set(key, mark)
     //
     // secondary index by date added
-    .set(["dateAdded", "marks", mark.dateAdded], mark)
+    .set(["dateAdded", "marks", mark.dateAdded, mark.url], mark)
     .commit();
 
   //

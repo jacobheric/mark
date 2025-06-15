@@ -54,6 +54,7 @@ export const reindex = async () => {
       "dateAdded",
       "marks",
       dateAdded,
+      mark.value.url,
     ], mark.value).commit();
 
     await Promise.all(
@@ -112,15 +113,34 @@ export const upsertMark = async (input: {
   //
   // secondary index by date added
   if (!existing) {
-    await kv.atomic().set(["dateAdded", "marks", dateAdded], mark).commit();
+    await kv.atomic().set(["dateAdded", "marks", dateAdded, mark.url], mark)
+      .commit();
   }
 };
 
 export const getMark = async (url: string) =>
   await kv.get<MarkType>(["marks", url]);
 
-export const deleteMark = async (url: string) =>
-  await kv.delete(["marks", url]);
+export const deleteMark = async (url: string) => {
+  const mark = await getMark(url);
+
+  if (!mark || !mark.value) {
+    console.error("deleting mark,  not found", url, "ignoring...");
+    return;
+  }
+
+  await kv.atomic().delete(["marks", mark.value.url])
+    .delete(["dateAdded", "marks", mark.value.dateAdded, mark.value.url])
+    .commit();
+
+  await Promise.all(
+    mark.value.tags.filter((tag) => tag).map((tag) =>
+      kv.atomic()
+        .delete(["tags", tag, mark.value.url])
+        .commit()
+    ),
+  );
+};
 
 export const levenshtein = (a: string, b: string): number => {
   const m = a.length, n = b.length;
