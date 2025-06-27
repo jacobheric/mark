@@ -13,7 +13,13 @@ export default function Layout(ctx: PageProps) {
             class="no-underline flex flex-row justify-start items-center gap-1"
             href="/"
           >
-            <img src="/mark.png" alt="Mark" class="w-6 h-6 dark:invert" />
+            <img
+              src="/mark.png"
+              alt="Mark"
+              class="w-6 h-6 dark:invert"
+              width="24"
+              height="24"
+            />
           </a>
         </div>
 
@@ -26,7 +32,9 @@ export default function Layout(ctx: PageProps) {
         </Partial>
       </div>
       <footer class="border-t flex flex-row items-center tracking-wide justify-center gap-1 h-14">
-        <div className="w-full inline text-right">Made with</div>
+        <div className="w-full inline text-right">
+          <a href="https://github.com/jacobheric/mark">Made</a> with
+        </div>
         <div className="text-xl">&#9829;</div>
         <div className="flex flex-row justify-start w-full">in Maine</div>
       </footer>
