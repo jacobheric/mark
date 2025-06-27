@@ -1,4 +1,5 @@
 import { kv } from "./kv/kv.ts";
+import { getTitle } from "./utils.ts";
 
 export type MarkType = {
   url: string;
@@ -91,11 +92,13 @@ export const upsertMark = async (input: {
   // convoluted exists check here so we don't overwrite dateAdded or alter
   // the existing date added secondary index
   const existing = (await kv.get<MarkType>(["marks", input.url]))?.value;
-  const dateAdded = new Date().toISOString();
+  const dateAdded = existing?.dateAdded ?? new Date().toISOString();
+  const title = input.title ?? await getTitle(input.url) ?? input.url;
   const mark = {
-    ...input,
+    url: input.url,
+    title,
     tags: input.tags.filter((tag) => tag).map((tag) => tag.trim()),
-    dateAdded: existing?.dateAdded ?? dateAdded,
+    dateAdded,
   };
 
   await kv.atomic().set(["marks", mark.url], mark).commit();
@@ -112,10 +115,8 @@ export const upsertMark = async (input: {
 
   //
   // secondary index by date added
-  if (!existing) {
-    await kv.atomic().set(["dateAdded", "marks", dateAdded, mark.url], mark)
-      .commit();
-  }
+  await kv.atomic().set(["dateAdded", "marks", dateAdded, mark.url], mark)
+    .commit();
 };
 
 export const getMark = async (url: string) =>
