@@ -38,7 +38,7 @@ export const handler = define.handlers<TagsProps>({
 export default define.page(
   function Tags({ data }: PageProps<TagsProps>) {
     return (
-      <div className="text-sm flex flex-row gap-4 items-center flex-wrap m-8 justify-start">
+      <div className="text-sm flex flex-row gap-4 items-center flex-wrap my-8 sm:mx-2 md:mx-8 justify-start">
         {Object.entries(data.tags).sort((a, b) => b[1] - a[1]).map((
           [tag, count],
         ) => (
