@@ -31,13 +31,11 @@ app.get("/auth/signin", async (ctx: Context<State>) => {
 });
 
 app.get("/auth/callback", async (ctx: Context<State>) => {
-  console.log("running auth/callback...");
   const { response, tokens } = await handleCallback(ctx.req);
   if (!PRODUCTION) {
     return response;
   }
 
-  console.log("getting user...");
   const userResponse = await fetch("https://api.github.com/user", {
     method: "get",
 
@@ -47,9 +45,7 @@ app.get("/auth/callback", async (ctx: Context<State>) => {
   });
 
   const user = await userResponse.json();
-  console.log("got user", user);
   if (!AUTHORIZED_USERS.includes(user.login)) {
-    console.log("user not authorized", user);
     await signOut(ctx.req);
     return new Response("Unauthorized", { status: 401 });
   }
@@ -62,7 +58,6 @@ app.get("/auth/signout", async (ctx: Context<State>) => {
 });
 
 const authMiddleware = define.middleware(async (ctx) => {
-  console.log("running authMiddleware...");
   const url = new URL(ctx.req.url);
 
   if (Deno.env.get("PRODUCTION") !== "true") {
@@ -75,11 +70,7 @@ const authMiddleware = define.middleware(async (ctx) => {
     return ctx.next();
   }
 
-  console.log("getting sessionId...");
-
   const sessionId = await getSessionId(ctx.req);
-
-  console.log("sessionId", sessionId);
 
   if (sessionId === undefined) {
     return redirect(
