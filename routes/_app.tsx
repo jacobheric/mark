@@ -1,6 +1,7 @@
 import type { PageProps } from "fresh";
+import { define } from "../lib/state.ts";
 
-export default function App({ Component }: PageProps) {
+function App({ Component }: PageProps) {
   return (
     <html>
       <head>
@@ -11,7 +12,6 @@ export default function App({ Component }: PageProps) {
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="shortcut icon" type="image/png" href="/favicon.png" />
 
-        <link rel="stylesheet" href="/styles.css" />
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body class="text-black dark:text-white bg-white dark:bg-gray-900">
@@ -20,3 +20,5 @@ export default function App({ Component }: PageProps) {
     </html>
   );
 }
+
+export default define.page(App);
