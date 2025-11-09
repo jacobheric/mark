@@ -1,11 +1,11 @@
 {
   "nodeModulesDir": "auto",
   "tasks": {
-    "ok": "deno fmt --check . && deno lint . && deno check --unstable-kv **/*.ts && deno check --unstable-kv **/*.tsx",
+    "check": "deno fmt --check . && deno lint . && deno check --unstable-kv **/*.ts && deno check --unstable-kv **/*.tsx",
 
-    "start": "deno run -A --unstable-kv vite",
+    "dev": "deno run -A --unstable-kv vite",
     "build": "deno run -A --unstable-kv vite build",
-    "preview": "deno serve -A _fresh/server.js",
+    "start": "deno serve -A _fresh/server.js",
 
     "update": "deno run -A -r jsr:@fresh/update .",
     "drop": "deno run -A --unstable-kv lib/kv/delete.ts",

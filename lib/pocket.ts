@@ -1,6 +1,6 @@
 import { POCKET_CONSUMER_KEY } from "./config.ts";
 import { kv } from "./kv/kv.ts";
-import { parse } from "jsr:@std/csv";
+import { parse } from "jsr:@std/csv@^1.0.6";
 import { MarkType } from "./marks.ts";
 
 export type Tag = {

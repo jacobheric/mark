@@ -1,7 +1,10 @@
 /// <reference lib="deno.unstable" />
 import { App, Context, staticFiles, trailingSlashes } from "fresh";
 import { define, redirect } from "@/lib/utils.ts";
-import { createGitHubOAuthConfig, createHelpers } from "jsr:@deno/kv-oauth";
+import {
+  createGitHubOAuthConfig,
+  createHelpers,
+} from "jsr:@deno/kv-oauth@^0.11.0";
 import "@std/dotenv/load";
 import { type State } from "./lib/state.ts";
 
