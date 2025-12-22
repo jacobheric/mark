@@ -61,14 +61,14 @@ app.get("/auth/signout", async (ctx: Context<State>) => {
 });
 
 const authMiddleware = define.middleware(async (ctx) => {
-  const url = new URL(ctx.req.url);
+  const { pathname, href } = new URL(ctx.req.url);
 
   if (Deno.env.get("PRODUCTION") !== "true") {
     return ctx.next();
   }
 
   if (
-    unrestricted.some((route) => url.pathname.startsWith(route))
+    unrestricted.some((route) => pathname.startsWith(route))
   ) {
     return ctx.next();
   }
@@ -76,9 +76,9 @@ const authMiddleware = define.middleware(async (ctx) => {
   const sessionId = await getSessionId(ctx.req);
 
   if (sessionId === undefined) {
-    return redirect(
-      "/auth/signin",
-    );
+    const params = new URLSearchParams();
+    params.set("success_url", href);
+    return redirect(`/auth/signin?${params.toString()}`);
   }
   return ctx.next();
 });
