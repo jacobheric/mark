@@ -261,7 +261,7 @@ export const Mark = (
         />
 
         <div className="flex flex-row gap-2">
-          <div className="text-xs text-gray-500 pt-0.5">suggested:</div>
+          <div className="text-xs text-gray-500 ">suggested:</div>
           {loadingSuggestions && <div className="text-xs">loading...</div>}
           {suggestionError && (
             <div className="text-xs text-red-500">{suggestionError}</div>
@@ -270,12 +270,12 @@ export const Mark = (
             <div className="text-xs text-gray-400">none</div>
           )}
           {suggestions.length > 0 && (
-            <div className="flex flex-wrap gap-x-1 gap-y-0.5 mb-1 text-xs">
+            <div className="flex flex-wrap gap-2 mb-1 text-xs">
               {suggestions.map((suggestedTag) => (
                 <a
                   key={suggestedTag}
                   href="#"
-                  className="p-0.5 px-1 rounded hover:bg-gray-100"
+                  className="px-1 rounded hover:bg-gray-100"
                   onClick={(e) => {
                     e.preventDefault();
                     addSuggestedTag(suggestedTag);
