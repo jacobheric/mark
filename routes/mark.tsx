@@ -1,7 +1,5 @@
 import { define } from "@/lib/utils.ts";
-
 import { page, PageProps } from "fresh";
-
 import { Mark } from "../islands/mark.tsx";
 import { deleteMark, getMark, upsertMark } from "../lib/marks.ts";
 

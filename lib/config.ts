@@ -7,3 +7,5 @@ export const OLD_DENO_KV_ACCESS_TOKEN = Deno.env.get(
 export const NEW_DENO_KV_ACCESS_TOKEN = Deno.env.get(
   "NEW_DENO_KV_ACCESS_TOKEN",
 );
+
+export const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");

@@ -9,10 +9,36 @@ export type MarkProps = {
   deleted?: boolean;
 };
 
+type SuggestTagsResponse = {
+  tags?: string[];
+  error?: string;
+};
+
+const uniqueTags = (values: string[]) => {
+  const seen = new Set<string>();
+  return values.reduce<string[]>((acc, value) => {
+    const tag = value.trim();
+    if (!tag) {
+      return acc;
+    }
+
+    const key = tag.toLowerCase();
+    if (seen.has(key)) {
+      return acc;
+    }
+
+    seen.add(key);
+    acc.push(tag);
+    return acc;
+  }, []);
+};
+
 const Tag = (
-  { defaultValue, another, inputRef, formRef }: {
-    defaultValue?: string;
+  { value, another, remove, update, inputRef, formRef }: {
+    value: string;
     another: () => void;
+    remove: () => void;
+    update: (value: string) => void;
     formRef: HTMLFormElement | null;
     inputRef: (el: HTMLInputElement | null) => void;
   },
@@ -23,8 +49,9 @@ const Tag = (
         name="tags[]"
         type="text"
         placeholder="add a tag"
-        defaultValue={defaultValue}
+        value={value}
         ref={inputRef}
+        onInput={(e) => update(e.currentTarget.value)}
         onKeyDown={(e) => {
           if (e.key !== "Enter") {
             return;
@@ -45,7 +72,7 @@ const Tag = (
         type="button"
         onClick={(e) => {
           e.preventDefault();
-          e.currentTarget.parentElement?.remove();
+          remove();
         }}
       >
         delete
@@ -55,23 +82,120 @@ const Tag = (
 };
 
 export const Mark = (
-  { url, title, tags = [""], success, error, deleted }: MarkProps,
+  { url, title, tags, success, error, deleted }: MarkProps,
 ) => {
-  const [tagList, setTagList] = useState<string[]>(tags);
+  const [tagList, setTagList] = useState<string[]>(tags?.length ? tags : [""]);
   const [deleteMark, setDeleteMark] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestionError, setSuggestionError] = useState("");
+  const requestedForUrlRef = useRef<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
+  const urlInputRef = useRef<HTMLInputElement>(null);
   const saveRef = useRef<HTMLButtonElement>(null);
 
   const another = () => setTagList((prev) => [...prev, ""]);
+  const updateTag = (index: number, value: string) =>
+    setTagList((prev) => prev.map((tag, i) => i === index ? value : tag));
+  const removeTag = (index: number) =>
+    setTagList((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      return next.length ? next : [""];
+    });
+
+  const loadSuggestions = async (targetUrl: string, existingTags: string[]) => {
+    const trimmedUrl = targetUrl.trim();
+    if (!trimmedUrl) {
+      setSuggestions([]);
+      setSuggestionError("url is required to suggest tags");
+      return;
+    }
+
+    setLoadingSuggestions(true);
+    setSuggestionError("");
+
+    try {
+      const response = await fetch("/suggest-tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: trimmedUrl,
+          title,
+          existingTags,
+        }),
+      });
+
+      const data = (await response.json()) as SuggestTagsResponse;
+
+      if (!response.ok) {
+        setSuggestions([]);
+        setSuggestionError(data.error ?? "unable to suggest tags");
+        return;
+      }
+
+      const nextSuggestions = uniqueTags(data.tags ?? []).filter(
+        (suggested) =>
+          !existingTags.some(
+            (existing) => existing.toLowerCase() === suggested.toLowerCase(),
+          ),
+      );
+
+      setSuggestions(nextSuggestions);
+      if (!nextSuggestions.length) {
+        setSuggestionError("no suggestions found");
+      }
+    } catch {
+      setSuggestions([]);
+      setSuggestionError("unable to suggest tags");
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const loadSuggestionsForCurrentUrl = () => {
+    const targetUrl = urlInputRef.current?.value ?? "";
+    const existingTags = uniqueTags(tagList);
+    loadSuggestions(targetUrl, existingTags);
+  };
+
+  const addSuggestedTag = (suggestedTag: string) => {
+    const hasTag = uniqueTags(tagList).some((tag) =>
+      tag.toLowerCase() === suggestedTag.toLowerCase()
+    );
+
+    if (hasTag) {
+      setSuggestions((prev) => prev.filter((tag) => tag !== suggestedTag));
+      return;
+    }
+
+    const emptyIndex = tagList.findIndex((tag) => !tag.trim());
+    if (emptyIndex >= 0) {
+      setTagList((prev) =>
+        prev.map((tag, i) => i === emptyIndex ? suggestedTag : tag)
+      );
+    } else {
+      setTagList((prev) => [...prev, suggestedTag]);
+    }
+
+    setSuggestions((prev) => prev.filter((tag) => tag !== suggestedTag));
+  };
 
   useEffect(() => {
-    formRef.current?.addEventListener("submit", () => {
+    const form = formRef.current;
+    if (!form) {
+      return;
+    }
+
+    const onSubmit = () => {
       if (saveRef.current) {
         saveRef.current.disabled = true;
         saveRef.current.textContent = "saving...";
       }
-    });
+    };
+
+    form.addEventListener("submit", onSubmit);
+    return () => form.removeEventListener("submit", onSubmit);
   }, []);
 
   useEffect(() => {
@@ -85,6 +209,28 @@ export const Mark = (
     }
   }, [deleteMark]);
 
+  useEffect(() => {
+    setTagList(tags?.length ? tags : [""]);
+  }, [tags]);
+
+  useEffect(() => {
+    const targetUrl = (url ?? "").trim();
+    if (!targetUrl) {
+      setSuggestions([]);
+      setSuggestionError("");
+      requestedForUrlRef.current = null;
+      return;
+    }
+
+    if (requestedForUrlRef.current === targetUrl) {
+      return;
+    }
+
+    requestedForUrlRef.current = targetUrl;
+    const existingTags = uniqueTags(tags ?? []);
+    loadSuggestions(targetUrl, existingTags);
+  }, [url, title, tags]);
+
   return (
     <div class="flex flex-col gap-4 m-8 text-sm">
       <form
@@ -94,44 +240,89 @@ export const Mark = (
       >
         <div>
           <input
+            ref={urlInputRef}
             type="text"
             name="url"
-            value={url}
+            defaultValue={url}
             placeholder="url"
             required
           />
         </div>
 
-        <input type="hidden" name="url" value={url} />
         <input
           type="hidden"
           name="title"
-          value={title}
+          value={title ?? ""}
         />
         <input
           type="hidden"
           name="deleteMark"
           value={deleteMark ? "true" : "false"}
         />
+
+        <div className="flex flex-row gap-2">
+          <div className="text-xs text-gray-500">suggested:</div>
+          {loadingSuggestions && <div className="text-xs">loading...</div>}
+          {suggestionError && (
+            <div className="text-xs text-red-500">{suggestionError}</div>
+          )}
+          {!loadingSuggestions && !suggestionError && !suggestions.length && (
+            <div className="text-xs text-gray-400">none</div>
+          )}
+          {suggestions.length > 0 && (
+            <div className="text-xs">
+              {suggestions.map((suggestedTag, i) => (
+                <span key={suggestedTag}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      addSuggestedTag(suggestedTag);
+                    }}
+                  >
+                    {suggestedTag}
+                  </a>
+                  {i < suggestions.length - 1 && " | "}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div class="flex flex-col gap-1" id="tags">
           {tagList.map((tag, i) => (
             <Tag
-              key={tag + i}
-              defaultValue={tags[i] || ""}
+              key={i}
+              value={tag}
               another={another}
+              remove={() => removeTag(i)}
+              update={(value) => updateTag(i, value)}
               formRef={formRef.current}
               inputRef={(el) => (inputRefs.current[i] = el)}
             />
           ))}
         </div>
-        <button
-          type="button"
-          className="w-fit"
-          onClick={another}
-        >
-          add another
-        </button>
+
+        <div className="flex flex-row gap-2">
+          <button
+            type="button"
+            className="w-fit"
+            onClick={another}
+          >
+            add another
+          </button>
+          <button
+            type="button"
+            className="w-fit disabled:opacity-50"
+            disabled={loadingSuggestions}
+            onClick={loadSuggestionsForCurrentUrl}
+          >
+            {loadingSuggestions ? "loading..." : "refresh suggestions"}
+          </button>
+        </div>
+
         <hr />
+
         <div className="flex flex-row gap-2">
           <button
             type="submit"
